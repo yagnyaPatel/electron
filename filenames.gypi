@@ -282,6 +282,8 @@
       'atom/browser/net/asar/url_request_asar_job.h',
       'atom/browser/net/atom_cert_verifier.cc',
       'atom/browser/net/atom_cert_verifier.h',
+      'atom/browser/net/atom_navigation_throttle.h',
+      'atom/browser/net/atom_navigation_throttle.cc',
       'atom/browser/net/atom_network_delegate.cc',
       'atom/browser/net/atom_network_delegate.h',
       'atom/browser/net/atom_url_request.cc',

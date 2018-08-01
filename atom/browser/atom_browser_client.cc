@@ -19,6 +19,7 @@
 #include "atom/browser/child_web_contents_tracker.h"
 #include "atom/browser/login_handler.h"
 #include "atom/browser/native_window.h"
+#include "atom/browser/net/atom_navigation_throttle.h"
 #include "atom/browser/session_preferences.h"
 #include "atom/browser/web_contents_permission_helper.h"
 #include "atom/browser/web_contents_preferences.h"
@@ -559,6 +560,14 @@ void AtomBrowserClient::RenderProcessExited(content::RenderProcessHost* host,
     }
     render_process_host_pids_.erase(host_pid);
   }
+}
+
+std::vector<std::unique_ptr<content::NavigationThrottle>>
+AtomBrowserClient::CreateThrottlesForNavigation(
+    content::NavigationHandle* handle) {
+  std::vector<std::unique_ptr<content::NavigationThrottle>> throttles;
+  throttles.push_back(base::WrapUnique(new AtomNavigationThrottle(handle)));
+  return throttles;
 }
 
 }  // namespace atom

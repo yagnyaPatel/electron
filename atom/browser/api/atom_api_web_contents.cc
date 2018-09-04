@@ -28,6 +28,8 @@
 #include "atom/browser/lib/bluetooth_chooser.h"
 #include "atom/browser/native_window.h"
 #include "atom/browser/net/atom_network_delegate.h"
+#include "atom/common/api/heap_snapshot_output_stream.h"
+#include "base/threading/thread_restrictions.h"
 #if defined(ENABLE_OSR)
 #include "atom/browser/osr/osr_output_device.h"
 #include "atom/browser/osr/osr_render_widget_host_view.h"
@@ -306,6 +308,10 @@ struct WebContents::FrameDispatchHelper {
                              const base::ListValue& args,
                              IPC::Message* message) {
     api_web_contents->OnRendererMessageSync(rfh, channel, args, message);
+  }
+
+  void OnCreateHeapSnapshotFile(IPC::Message* message) {
+    api_web_contents->OnCreateHeapSnapshotFile(rfh, message);
   }
 };
 
@@ -1044,6 +1050,9 @@ bool WebContents::OnMessageReceived(const IPC::Message& message,
     IPC_MESSAGE_HANDLER(AtomAutofillFrameHostMsg_ShowPopup, ShowAutofillPopup)
     IPC_MESSAGE_HANDLER(AtomAutofillFrameHostMsg_HidePopup, HideAutofillPopup)
 #endif
+    IPC_MESSAGE_FORWARD_DELAY_REPLY(
+        AtomFrameHostMsg_CreateHeapSnapshotFile, &helper,
+        FrameDispatchHelper::OnCreateHeapSnapshotFile)
     IPC_MESSAGE_UNHANDLED(handled = false)
   IPC_END_MESSAGE_MAP()
 
@@ -2114,6 +2123,21 @@ void WebContents::OnRendererMessageTo(content::RenderFrameHost* frame_host,
   if (web_contents) {
     web_contents->SendIPCMessageWithSender(send_to_all, channel, args, ID());
   }
+}
+
+void WebContents::OnCreateHeapSnapshotFile(content::RenderFrameHost* frame_host,
+                                           IPC::Message* message) {
+  base::ScopedAllowBlockingForTesting allow_blocking;
+
+  auto file_path = HeapSnapshotOutputStream::GetFilePath();
+
+  base::File file(file_path,
+                  base::File::FLAG_CREATE_ALWAYS | base::File::FLAG_WRITE);
+
+  AtomFrameHostMsg_CreateHeapSnapshotFile::WriteReplyParams(
+      message, file_path, IPC::TakePlatformFileForTransit(std::move(file)));
+
+  frame_host->Send(message);
 }
 
 // static

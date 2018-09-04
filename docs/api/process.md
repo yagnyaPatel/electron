@@ -171,6 +171,10 @@ Returns `Object`:
 Returns an object giving memory usage statistics about the entire system. Note
 that all statistics are reported in Kilobytes.
 
+### `process.takeHeapSnapshot()`
+
+Returns `String` - The file path if the heap snapshot has been created successfully.
+
 ### `process.hang()`
 
 Causes the main thread of the current process hang.

@@ -345,14 +345,12 @@ jobs:
   electron-osx-testing:
     environment:
       GN_CONFIG: //electron/build/args/testing.gn
-      RUN_TESTS: true
     <<: *mac-build-machine
     <<: *mac-build-steps
 
   electron-mas-testing:
     environment:
       GN_CONFIG: //electron/build/args/testing.gn
-      RUN_TESTS: true
       GN_EXTRA_ARGS: 'is_mas_build = true'
     <<: *mac-build-machine
     <<: *mac-build-steps
@@ -372,16 +370,8 @@ workflows:
 
   build-mac-fork-prs:
     jobs:
-      - electron-mas-testing:
-          filters:
-            branches:
-              # only from forks
-              only: /^pull\/.*$/
-      - electron-osx-testing:
-          filters:
-            branches:
-              # only from forks
-              only: /^pull\/.*$/
+      - electron-mas-testing
+      - electron-osx-testing
 
   nightly-release-test:
     triggers:
